@@ -21,6 +21,16 @@ func NewModelProduct(name string, price float64, quantity int, description strin
 	}
 }
 
+func NewModelCompleteProduct(id int, name string, price float64, quantity int, description string) Product {
+	return Product{
+		ID:          id,
+		Name:        name,
+		Price:       price,
+		Quantity:    quantity,
+		Description: description,
+	}
+}
+
 func FindAll() []Product {
 	var db = database.DatabaseConnect()
 	defer db.Close()
@@ -29,7 +39,6 @@ func FindAll() []Product {
 	if err != nil {
 		panic(err.Error())
 	}
-	p := Product{}
 	var products []Product
 	for rows.Next() {
 		var id, quantity int
@@ -39,12 +48,7 @@ func FindAll() []Product {
 		if err != nil {
 			panic(err.Error())
 		}
-		p.ID = id
-		p.Name = name
-		p.Price = price
-		p.Description = description
-		p.Quantity = quantity
-
+		p := NewModelCompleteProduct(id, name, price, quantity, description)
 		products = append(products, p)
 	}
 	return products
@@ -56,22 +60,17 @@ func FindById(id string) Product {
 	if err != nil {
 		panic(err.Error())
 	}
+	var ID, quantity int
+	var name, description string
+	var price float64
 
-	p := Product{}
 	for rows.Next() {
-		var id, quantity int
-		var name, description string
-		var price float64
-		err := rows.Scan(&id, &name, &description, &price, &quantity)
+		err := rows.Scan(&ID, &name, &description, &price, &quantity)
 		if err != nil {
 			panic(err.Error())
 		}
-		p.ID = id
-		p.Name = name
-		p.Price = price
-		p.Description = description
-		p.Quantity = quantity
 	}
+	p := NewModelCompleteProduct(ID, name, price, quantity, description)
 	defer db.Close()
 	return p
 }
